@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome {{ name }} | {{ docname }}</title>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/YOCRRZ224/Doxo/refs/heads/main/static/fav.png">
+<meta name="title" content="DOXO — Real-time Collaborative Editor">
+<meta name="description" content="DOXO is a real-time collaborative text editor with live cursors, chat, autosave, and rooms. Create and edit documents together instantly.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://your-railway-url.up.railway.app/">
+<meta property="og:title" content="DOXO — Real-time Collaborative Editor">
+<meta property="og:description" content="Edit documents together in real time. Live cursors, chat, autosave, and secure rooms. Built for speed and collaboration.">
+<meta property="og:image" content="https://raw.githubusercontent.com/YOCRRZ224/Doxo/refs/heads/main/static/banner.png">
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://your-railway-url.up.railway.app/">
+<meta property="twitter:title" content="DOXO — Real-time Collaborative Editor">
+<meta property="twitter:description" content="A real-time collaborative editor with live cursors and chat. Create rooms and edit instantly.">
+<meta property="twitter:image" content="https://raw.githubusercontent.com/YOCRRZ224/Doxo/refs/heads/main/static/banner.png">
+<link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  margin:0;
+  font-family: monospace;
+  background:#f5f5f5;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+#topbar {
+  border-bottom:4px solid black;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:white;
+  flex-wrap:wrap;
+}
+
+#topbar button {
+  background: white;
+  color: black;
+  padding:6px 12px;
+  cursor:pointer;
+  margin-left:5px;
+  margin-top:5px;
+  border:2px solid black;
+  margin-bottom:8px;
+  padding:6px;
+  transition:.2s all ease;
+  box-shadow:2px 2px 0 black;
+}
+button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 black;
+}
+#users {
+  border-bottom:2px solid black;
+  padding:6px;
+  display:flex;
+  gap:10px;
+  background:white;
+  flex-wrap:wrap;
+}
+
+.user {
+  display:flex;
+  align-items:center;
+}
+
+.avatar {
+  width:28px;
+  height:28px;
+  border:2px solid black;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin-right:5px;
+}
+#main {
+  flex:1;
+  display:flex;
+  width:100%;
+  height:100%;
+  min-height:0;
+}
+#editor {
+  flex:1;
+  padding:15px;
+  font-size:16px;
+  outline:none;
+  border:none;
+  background:white;
+  overflow-y:auto;
+  min-width:0;
+  min-height:0;
+}
+
+.chat-panel {
+  width:250px;
+  max-width:250px;
+  border-left:4px solid black;
+  background:white;
+  display:flex;
+  flex-direction:column;
+  transition: all 0.2s ease;
+}
+
+.hidden { display:none; }
+
+#chatMessages {
+  flex:1;
+  padding:10px;
+  overflow-y:auto;
+}
+
+.chat-input {
+  display:flex;
+  gap:5px;
+  padding:5px;
+  border-top:2px solid black;
+}
+
+.chat-input input {
+  flex:1;
+  padding:5px;
+  font-family: monospace;
+}
+
+.chat-bubble {
+  border:2px solid black;
+  margin-bottom:8px;
+  padding:6px;
+  box-shadow:2px 2px 0 black;
+}
+.chat-name { font-weight:bold; }
+.cursor-flag {
+  position:absolute;
+  font-size:12px;
+  padding:2px 6px;
+  border:2px solid black;
+  background:white;
+  pointer-events:none;
+  transform: translateY(-18px);
+}
+#popup {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:white;
+  border:3px solid black;
+  box-shadow:4px 4px 0 black;
+  padding:10px;
+  display:none;
+}
+
+@media (max-width:800px){
+  #main {
+    flex-direction:column-reverse;
+    height:auto;
+  }
+  .chat-panel {
+    width:100%;
+    border-left:none;
+    border-top:4px solid black;
+  }
+  #editor {
+  flex: 1;
+  min-height: 200px;
+}
+}
+@media (max-width:800px){
+  .chat-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40vh;
+    z-index: 999;
+  }
+}
+#ai-panel {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90%, 320px);
+  background: white;
+  border: 3px solid black;
+  padding: 10px;
+  font-family: monospace;
+  z-index: 9999;
+  transition: 0.2s ease;
+  box-sizing: border-box;
+}
+
+#ai-panel.hidden {
+  opacity: 0;
+  transform: translate(-50%, 20px);
+  pointer-events: none;
+}
+
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  flex-wrap: wrap;
+}
+
+#ai-input {
+  background: white;
+  color: black;
+  padding: 6px 12px;
+  border: 2px solid black;
+  margin: 5px 0 8px 0;
+  box-shadow: 2px 2px 0 black;
+  outline: none;
+  font-size: 14px;
+  border-radius: 0;
+  width: calc(100% - 12px);
+  box-sizing: border-box;
+}
+
+#ai-send {
+  background: white;
+  color: black;
+  padding: 6px 12px;
+  cursor: pointer;
+  margin-top: 5px;
+  border: 2px solid black;
+  box-shadow: 2px 2px 0 black;
+  transition: 0.1s ease;
+}
+
+#ai-send:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 black;
+}
+
+#ai-response {
+  margin-top: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  
+  background: #fff;
+  border: 2px solid black;
+  box-shadow: 2px 2px 0 black;
+  padding: 8px;
+  border-radius: 4px;
+  
+  line-height: 1.4;
+}
+#ai-response::-webkit-scrollbar {
+  width: 6px;
+}
+
+#ai-response::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+#ai-response::-webkit-scrollbar-thumb {
+  background: black;
+  border-radius: 3px;
+}
+#ai-response * {
+  user-select: text;
+}
+
+@media (max-width: 400px) {
+  #ai-panel {
+    bottom: 60px;
+    padding: 8px;
+  }
+  #ai-input, #ai-send {
+    font-size: 13px;
+  }
+}
+#send {
+      background: white;
+  color: black;
+  padding:6px 12px;
+  cursor:pointer;
+  margin-left:5px;
+  margin-top:5px;
+  border:2px solid black;
+  margin-bottom:8px;
+  padding:6px;
+  box-shadow:2px 2px 0 black;
+}
+#chatInput {
+  background: white;
+  color: black;
+  padding: 6px 12px; 
+  border: 2px solid black;
+  margin: 5px 0 8px 5px;  */
+  box-shadow: 2px 2px 0 black;
+  outline: none;
+  font-size: 14px;
+  border-radius: 0;
+}
+i {
+  vertical-align: middle; 
+  line-height: 1;
+  font-size: 1em;
+  display: inline-block;
+}
+.d {
+  background: red;
+  color: white;
+  padding: 6px 12px;
+  cursor: pointer;
+  margin: 5px 0 8px 5px;
+  border: 2px solid black;
+  box-shadow: 2px 2px 0 black;
+  transition: all 0.1s ease;
+  font-size: 14px;
+  user-select: none;
+}
+.d:hover {
+  background: #ff4c4c;
+}
+
+.d:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 black;
+}
+#chatMessages::-webkit-scrollbar,
+#ai-response::-webkit-scrollbar {
+  width: 6px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb,
+#ai-response::-webkit-scrollbar-thumb {
+  background: black;
+  border-radius: 3px;
+}
+#ai-panel {
+  transition: opacity .2s ease, transform .2s ease;
+}
+#topbar > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#ai-drag-handle {
+  cursor: move;
+  user-select: none;
+}
+#ai-panel {
+  position: fixed;
+  cursor: grab;
+}
+
+#ai-panel:active {
+  cursor: grabbing;
+}
+#ai-panel {
+  position: fixed;
+  width: 320px;
+  height: 380px;
+  left: calc(50% - 160px);
+  top: 120px;
+
+  background: white;
+  border: 3px solid black;
+  padding: 10px;
+  font-family: monospace;
+  z-index: 9999;
+
+  box-sizing: border-box;
+  cursor: grab;
+}
+
+#ai-panel:active {
+  cursor: grabbing;
+}
+
+#ai-panel.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+#statusbar {
+  border-top: 4px solid black;
+  background: white;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: monospace;
+
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  box-shadow: 0 -2px 0 black;
+}
+@media (max-width: 600px) {
+
+  #topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  #statusbar {
+    position: sticky;
+    bottom: 0;
+    z-index: 1000;
+  }
+
+  #editor {
+    font-size: 15px;
+    padding: 12px;
+  }
+
+ 
+  .chat-panel {
+    position: fixed;
+    inset: auto 0 0 0;
+    height: 45dvh;
+    max-width: none;
+    z-index: 2000;
+  }
+
+  /* AI centers itself */
+  #ai-panel {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+/* ---------- SHARE PANEL ---------- */
+#share-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: min(90vw, 360px);
+  background: white;
+  border: 3px solid black;
+  box-shadow: 4px 4px 0 black;
+  padding: 10px;
+
+  font-family: monospace;
+  z-index: 9999;
+}
+
+#share-panel.hidden {
+  display: none;
+}
+
+.share-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#share-link {
+  width: 100%;
+  padding: 6px 10px;
+  border: 2px solid black;
+  box-shadow: 2px 2px 0 black;
+  font-family: monospace;
+  margin-bottom: 10px;
+  background: #fdfdfd;
+}
+
+.share-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.share-actions button {
+  flex: 1;
+  background: white;
+  border: 2px solid black;
+  box-shadow: 2px 2px 0 black;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.share-actions button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 black;
+}
+.qr-wrap {
+  margin-top: 14px;
+  bottom: 5px;
+  padding: 10px;
+  border: 2px solid black;
+  box-shadow: 2px 2px 0 black;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#qrCanvas {
+  width: 140px;
+  height: 140px;
+}
+
+.qr-hint {
+  font-size: 12px;
+  margin-top: 6px;
+  opacity: 0.7;
+}
+#delete-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: min(90vw, 340px);
+  background: white;
+  border: 3px solid black;
+  box-shadow: 4px 4px 0 black;
+  padding: 12px;
+
+  font-family: monospace;
+  z-index: 9999;
+}
+
+#delete-panel.hidden {
+  display: none;
+}
+.share-actions .d {
+  background: red;
+  color: white;
+}
+/* ---------- DOWNLOAD PANEL (visual parity only) ---------- */
+#download-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: min(90vw, 360px);
+  background: white;
+  border: 3px solid black;
+  box-shadow: 4px 4px 0 black;
+  padding: 10px;
+
+  font-family: monospace;
+  z-index: 9999;
+}
+
+#download-panel.hidden {
+  display: none;
+}
+#api{
+          background: white;
+  color: black;
+  padding:6px 12px;
+  cursor:pointer;
+  margin-left:5px;
+  margin-top:5px;
+  border:2px solid black;
+  margin-bottom:8px;
+  padding:6px;
+  box-shadow:2px 2px 0 black;
+}
+</style>
+</head>
+
+<body>
+
+<div id="topbar">
+  <div><i class="ph ph-file"></i> {{ docname }} | Room: {{ room }}</div>
+  <div>
+    <button onclick="toggleAI()"><i class="ph ph-robot"></i> AI</button>
+    <button onclick="toggleChat()"><i class="ph ph-chats"></i> Chat</button>
+   <button onclick="toggleShare()"><i class="ph ph-share-fat"></i> Share</button>
+    <button onclick="toggleDownload()"><i class="ph ph-download-simple"></i> Download</button>
+    <button onclick="deleteFile()" class="d"><i class="ph ph-trash"></i> Delete</button>
+    <button onclick="leaveRoom()" class="d"><i class="ph ph-door-open"></i> Leave</button>
+  </div>
+</div>
+
+<div id="users"></div>
+
+<div id="main">
+  <div id="editor" contenteditable="true"></div>
+
+  <div id="chatPanel" class="chat-panel hidden">
+    <div id="chatMessages"></div>
+    <div class="chat-input">
+      <input id="chatInput" placeholder="Message...">
+      <button onclick="sendChat()" id="send"> <i class="ph ph-paper-plane-right"></i> Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI PANEL -->
+<div id="ai-panel" class="hidden">
+        <button onclick="toggleAI()" class="d">
+      <i class="ph ph-x"></i>
+    </button>
+    <div id="ai-key-wrap" style="margin-bottom:8px;">
+  <input
+    id="ai-key-input"
+    placeholder="Paste your Groq API key"
+    style="
+      width:100%;
+      padding:6px;
+      border:2px solid black;
+      box-shadow:2px 2px 0 black;
+      font-family:monospace;
+    "
+  />
+  <button id="api" onclick="saveAIKey()" style="margin-top:6px;" >
+    Save key locally
+  </button>
+  <div style="font-size:11px; opacity:.7; margin-top:4px;">
+    🔒 Stored only in your browser
+    I don't take your keys this project is open source and yes your keys directly talk to groq and just use our header and prompt.
+  </div>
+</div>
+  <div class="ai-header" id="ai-drag-handle">
+    <span>DOXO AI</span>
+  </div>
+
+  <textarea id="ai-input" placeholder="Ask AI...
+ex: write an email and paste into document"></textarea>
+
+  <button id="ai-send" onclick="sendAI()">
+    <i class="ph ph-paper-plane-right"></i> Send
+  </button>
+
+  <div id="ai-response">
+    HII <i class="ph ph-hand-waving"></i> {{ name }}
+  </div>
+</div>
+<!-- SHARE PANEL -->
+<div id="share-panel" class="hidden">
+  <div class="share-header">
+    <span><i class="ph ph-share-network"></i> Share Room</span>
+    <button class="d" onclick="toggleShare()">
+      <i class="ph ph-x"></i>
+    </button>
+  </div>
+
+  <input id="share-link" readonly>
+    <div class="qr-wrap">
+  <canvas id="qrCanvas"></canvas>
+  <div class="qr-hint">Scan to join room</div>
+</div>
+  <div class="share-actions">
+    <button onclick="copyShareLink()">
+      <i class="ph ph-copy"></i> Copy
+    </button>
+
+    <button onclick="nativeShare()">
+      <i class="ph ph-paper-plane-tilt"></i> Share
+    </button>
+  </div>
+</div>
+<!-- DELETE CONFIRM PANEL -->
+<div id="delete-panel" class="hidden">
+  <div class="share-header">
+    <span><i class="ph ph-warning-octagon"></i> Delete Document</span>
+    <button class="d" onclick="toggleDelete()">
+      <i class="ph ph-x"></i>
+    </button>
+  </div>
+
+  <p style="font-size:13px; margin-bottom:12px;">
+    This will permanently delete this document.<br>
+    <b>This action cannot be undone.</b>
+  </p>
+
+  <div class="share-actions">
+    <button onclick="toggleDelete()">
+      <i class="ph ph-arrow-left"></i> Cancel
+    </button>
+
+    <button class="d" onclick="confirmDelete()">
+      <i class="ph ph-trash"></i> Delete
+    </button>
+  </div>
+</div>
+<div id="download-panel" class="hidden">
+  <div class="share-header">
+    <span><i class="ph ph-download"></i> Download</span>
+    <button class="d" onclick="toggleDownload()">
+      <i class="ph ph-x"></i>
+    </button>
+  </div>
+
+  <div class="share-actions" style="flex-direction:column; gap:8px;">
+    <button onclick="downloadAs('txt')">
+      <i class="ph ph-file-text"></i> TXT
+    </button>
+    <button onclick="downloadAs('md')">
+      <i class="ph ph-markdown-logo"></i> Markdown
+    </button>
+    <button onclick="downloadAs('html')">
+      <i class="ph ph-code"></i> HTML
+    </button>
+    <button onclick="copyAll()">
+      <i class="ph ph-clipboard"></i> Copy text
+    </button>
+  </div>
+</div>
+<div id="popup"></div>
+<div id="statusbar">
+  <span id="stat-words">Words: 0</span>
+  <span id="stat-lines">Lines: 0</span>
+  <span id="stat-chars">Chars: 0</span>
+  <span id="stat-cursor">Ln 1 : Col 1</span>
+  <span id="stat-users">Users: 1</span>
+  <span id="stat-save">Saved</span>
+</div>
+<script>
+const ROOM = "{{ room }}";
+let NAME = "{{ name }}";
+let COLOR = "{{ color }}";
+let EMOJI = "{{ emoji }}";
+const socket = io();
+const editor = document.getElementById("editor");
+const usersDiv = document.getElementById("users");
+const popup = document.getElementById("popup");
+const chatPanel = document.getElementById("chatPanel");
+
+let isTyping = false;
+
+/* ---------- CURSOR SAVE / RESTORE ---------- */
+function saveCursorPosition() {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return null;
+  return sel.getRangeAt(0).cloneRange();
+}
+
+function restoreCursorPosition(range) {
+  if (!range) return;
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+/* ---------- TEXT SYNC ---------- */
+editor.addEventListener("input", () => {
+  isTyping = true;
+  socket.emit("text_update", { room: ROOM, text: editor.innerText });
+  setTimeout(() => isTyping = false, 200);
+});
+
+/* Autosave every 5s */
+setInterval(() => {
+  socket.emit("autosave", { room:ROOM, text:editor.innerText });
+}, 5000);
+
+socket.on("load_text", text => {
+  editor.innerText = text;
+});
+
+socket.on("text_sync", text => {
+  if (isTyping || document.activeElement !== editor) return; // don't override local typing
+
+  const cursor = saveCursorPosition();
+  editor.innerText = text;
+  restoreCursorPosition(cursor);
+});
+window.addEventListener("beforeunload", () => {
+  socket.emit("leave", { room: ROOM, name: NAME });
+});
+/* ---------- USERS ---------- */
+socket.on("user_list", users => {
+  usersDiv.innerHTML = "";
+  for(let name in users){
+    const u = users[name];
+    const avatar = u.emoji ? u.emoji : name[0].toUpperCase();
+    usersDiv.innerHTML += `<div class="user"><div class="avatar" style="border-color:${u.color}">${avatar}</div>${name}</div>`;
+  }
+});
+
+/* ---------- CURSOR FLAGS ---------- */
+function getCaretPosition(){
+  const sel = window.getSelection();
+  if(!sel.rangeCount) return null;
+  const rect = sel.getRangeAt(0).getBoundingClientRect();
+  return {x:rect.left, y:rect.top};
+}
+
+function sendCursor(){
+  const pos = getCaretPosition();
+  if(!pos) return;
+  socket.emit("cursor_move",{ room:ROOM, name:NAME, color:COLOR, x:pos.x, y:pos.y });
+}
+
+editor.addEventListener("keyup", sendCursor);
+editor.addEventListener("click", sendCursor);
+
+socket.on("cursor_sync", data => {
+  let flag = document.getElementById("cursor-"+data.name);
+  if(!flag){
+    flag = document.createElement("div");
+    flag.id = "cursor-"+data.name;
+    flag.className = "cursor-flag";
+    document.body.appendChild(flag);
+  }
+  flag.innerText = data.name;
+  flag.style.left = data.x+"px";
+  flag.style.top = data.y+"px";
+  flag.style.color = data.color;
+  flag.style.borderColor = data.color;
+});
+
+/* ---------- CHAT ---------- */
+function toggleChat(){
+  chatPanel.classList.toggle("hidden");
+}
+
+function sendChat(){
+  const input = document.getElementById("chatInput");
+  if(input.value==="") return;
+  socket.emit("chat_message",{ room:ROOM, name:NAME, color:COLOR, message:input.value });
+  input.value="";
+}
+
+socket.on("chat_sync", data => {
+  const box = document.getElementById("chatMessages");
+  box.innerHTML += `<div class="chat-bubble"><div class="chat-name" style="color:${data.color}">${data.name}</div>${data.message}</div>`;
+  box.scrollTop = box.scrollHeight;
+});
+
+/* ---------- POPUP ---------- */
+socket.on("popup", msg => {
+  popup.innerText = msg;
+  popup.style.display="block";
+  setTimeout(()=>popup.style.display="none",2000);
+});
+
+socket.on("join_error", msg => { alert(msg); window.location.href="/"; });
+
+/* ---------- BUTTONS ---------- */
+function generateQR(link) {
+  const canvas = document.getElementById("qrCanvas");
+  if (!canvas) return;
+
+  // clear old QR
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  QRCode.toCanvas(canvas, link, {
+    width: 140,
+    margin: 1,
+    color: {
+      dark: "#000000",
+      light: "#ffffff"
+    }
+  });
+}
+function copyShareLink() {
+  const input = document.getElementById("share-link");
+  input.select();
+  input.setSelectionRange(0, 99999);
+
+  navigator.clipboard.writeText(input.value).then(() => {
+    popup.innerText = "Link copied!";
+    popup.style.display = "block";
+    setTimeout(() => popup.style.display = "none", 1500);
+  });
+}
+function toggleShare() {
+  document.getElementById("ai-panel").classList.add("hidden");
+  chatPanel.classList.add("hidden");
+
+  const panel = document.getElementById("share-panel");
+  panel.classList.toggle("hidden");
+
+  if (!panel.classList.contains("hidden")) {
+    const baseUrl = window.location.origin + "/";
+    const fullLink = `${baseUrl}?room=${encodeURIComponent(ROOM)}`;
+
+    const input = document.getElementById("share-link");
+    input.value = fullLink;
+
+    // 🔥 generate QR
+    generateQR(fullLink);
+  }
+}
+function nativeShare() {
+  const url = document.getElementById("share-link").value;
+
+  if (navigator.share) {
+    navigator.share({
+      title: "DOXO — Collaborative Document",
+      text: "Join my DOXO document:",
+      url
+    });
+  } else {
+    popup.innerText = "Sharing not supported on this browser";
+    popup.style.display = "block";
+    setTimeout(() => popup.style.display = "none", 1500);
+  }
+}
+function download(){
+  const blob = new Blob([editor.innerText], {type:"text/plain"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="{{ docname }}.txt";
+  a.click();
+}
+
+function toggleDelete() {
+  document.getElementById("ai-panel").classList.add("hidden");
+  chatPanel.classList.add("hidden");
+
+  const panel = document.getElementById("delete-panel");
+  panel.classList.toggle("hidden");
+}
+
+function deleteFile() {
+  toggleDelete(); // just opens modal
+}
+
+function confirmDelete() {
+  socket.emit("delete_file", { room: ROOM });
+
+  popup.innerText = "Document deleted";
+  popup.style.display = "block";
+  setTimeout(() => popup.style.display = "none", 1500);
+
+  window.location.href = "/";
+}
+
+function leaveRoom(){
+  socket.emit("leave",{room:ROOM,name:NAME});
+  window.location.href="/";
+}
+socket.on("user_left", name => {
+  const flag = document.getElementById("cursor-"+name);
+  if(flag) flag.remove();
+});
+</script>
+<script>
+function joinRoom(){
+  socket.emit("join", { 
+    room: ROOM, 
+    name: NAME || "Guest", 
+    color: COLOR || "#000000", 
+    emoji: EMOJI || "" 
+  });
+}
+
+window.onload = () => {
+  joinRoom();
+};
+let aiOpen = false;
+
+function toggleAI(){
+  const panel = document.getElementById("ai-panel");
+  aiOpen = !aiOpen;
+  panel.classList.toggle("hidden");
+}
+
+function sendAI(){
+  const prompt = document.getElementById("ai-input").value;
+  const text = editor.innerText;
+  const apiKey = getAIKey();
+
+  if(!apiKey){
+    popup.innerText = "Paste Groq API key first";
+    popup.style.display = "block";
+    setTimeout(()=>popup.style.display="none",1200);
+    return;
+  }
+
+  if(!prompt) return;
+
+  document.getElementById("ai-response").innerText = "Thinking...";
+
+  socket.emit("ai_prompt", {
+    room: ROOM,
+    prompt,
+    text,
+    api_key: apiKey
+  });
+}
+document.getElementById("ai-input").value = "";
+socket.on("ai_response", data => {
+  document.getElementById("ai-response").innerText = data.content;
+
+  if(data.action === "replace"){
+  popup.innerText = "AI updated the document";
+  popup.style.display = "block";
+  setTimeout(()=>popup.style.display="none",1500);
+}
+});
+document.getElementById("ai-input").addEventListener("keydown", e => {
+  if(e.key === "Enter" && (e.ctrlKey || e.metaKey)){
+    sendAI();
+  }
+});
+function toggleDownload(){
+  document.getElementById("download-panel").classList.toggle("hidden");
+}
+
+function downloadAs(type){
+  let content = editor.innerText;
+  let mime = "text/plain";
+  let ext = type;
+
+  if(type === "html"){
+    content = `<pre>${content}</pre>`;
+    mime = "text/html";
+  }
+
+  const blob = new Blob([content], { type: mime });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${ROOM}.${ext}`;
+  a.click();
+
+  toggleDownload();
+}
+
+function copyAll(){
+  navigator.clipboard.writeText(editor.innerText);
+  popup.innerText = "Copied to clipboard";
+  popup.style.display = "block";
+  setTimeout(()=>popup.style.display="none",1200);
+}
+</script>
+<script>
+document.addEventListener("keydown", (e) => {
+  const isMac = navigator.platform.toUpperCase().includes("MAC");
+  const mod = isMac ? e.metaKey : e.ctrlKey;
+
+  if (!mod) return;
+
+  // Ctrl/Cmd + K → Toggle AI
+  if (e.key.toLowerCase() === "k") {
+    e.preventDefault();
+    toggleAI();
+
+    // auto-focus AI input
+    setTimeout(() => {
+      const input = document.getElementById("ai-input");
+      if (input && !document.getElementById("ai-panel").classList.contains("hidden")) {
+        input.focus();
+      }
+    }, 50);
+  }
+
+  // Ctrl/Cmd + M → Toggle Chat
+  if (e.key.toLowerCase() === "m") {
+    e.preventDefault();
+    toggleChat();
+
+    // auto-focus chat input
+    setTimeout(() => {
+      const input = document.getElementById("chatInput");
+      if (input && !chatPanel.classList.contains("hidden")) {
+        input.focus();
+      }
+    }, 50);
+  }
+});
+</script>
+<script>
+(() => {
+  const panel = document.getElementById("ai-panel");
+  if (!panel) return;
+
+  let isDragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  panel.addEventListener("mousedown", (e) => {
+    // ❌ Ignore form controls (important)
+    if (
+      e.target.tagName === "TEXTAREA" ||
+      e.target.tagName === "INPUT" ||
+      e.target.tagName === "BUTTON"
+    ) {
+      return;
+    }
+
+    isDragging = true;
+    panel.style.cursor = "grabbing";
+
+    const rect = panel.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+
+    panel.style.left = `${e.clientX - offsetX}px`;
+    panel.style.top = `${e.clientY - offsetY}px`;
+  });
+
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+    panel.style.cursor = "grab";
+  });
+  panel.addEventListener("touchstart", (e) => {
+  const t = e.touches[0];
+  const rect = panel.getBoundingClientRect();
+  offsetX = t.clientX - rect.left;
+  offsetY = t.clientY - rect.top;
+  isDragging = true;
+});
+
+document.addEventListener("touchmove", (e) => {
+  if (!isDragging) return;
+  const t = e.touches[0];
+  panel.style.left = `${t.clientX - offsetX}px`;
+  panel.style.top = `${t.clientY - offsetY}px`;
+});
+
+document.addEventListener("touchend", () => {
+  isDragging = false;
+});
+})();
+function updateCursorStats() {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+
+  const range = sel.getRangeAt(0);
+  const preRange = range.cloneRange();
+  preRange.selectNodeContents(editor);
+  preRange.setEnd(range.endContainer, range.endOffset);
+
+  const text = preRange.toString();
+  const lines = text.split("\n");
+
+  const line = lines.length;
+  const col = lines[lines.length - 1].length + 1;
+
+  document.getElementById("stat-cursor").innerText = `Ln ${line} : Col ${col}`;
+}
+
+editor.addEventListener("keyup", updateCursorStats);
+editor.addEventListener("click", updateCursorStats);
+socket.on("user_list", users => {
+  usersDiv.innerHTML = "";
+
+  let count = 0;
+  for (let name in users) {
+    count++;
+    const u = users[name];
+    usersDiv.innerHTML += `
+      <div class="user">
+        <div class="avatar" style="border-color:${u.color}">
+          ${u.emoji || name[0]}
+        </div>
+        ${name}
+      </div>`;
+  }
+
+  document.getElementById("stat-users").innerText = `Users: ${count}`;
+});
+socket.on("autosaved", () => {
+  const el = document.getElementById("stat-save");
+  el.innerText = "Saved ✓";
+  setTimeout(() => el.innerText = "Saved", 1500);
+});
+function updateStats() {
+  const text = editor.innerText || "";
+
+  const words = text.trim()
+    ? text.trim().split(/\s+/).length
+    : 0;
+
+  const lines = text.split("\n").length;
+  const chars = text.length;
+
+  document.getElementById("stat-words").innerText = `Words: ${words}`;
+  document.getElementById("stat-lines").innerText = `Lines: ${lines}`;
+  document.getElementById("stat-chars").innerText = `Chars: ${chars}`;
+}
+
+editor.addEventListener("input", updateStats);
+window.addEventListener("load", updateStats);
+socket.on("text_sync", text => {
+  const cursor = saveCursorPosition();
+  editor.innerText = text;
+  restoreCursorPosition(cursor);
+});
+function getAIKey(){
+  return localStorage.getItem("groq_api_key");
+}
+
+function saveAIKey(){
+  const key = document.getElementById("ai-key-input").value.trim();
+  if(!key.startsWith("gsk_")){
+    popup.innerText = "Invalid Groq API key";
+    popup.style.display = "block";
+    setTimeout(()=>popup.style.display="none",1200);
+    return;
+  }
+  localStorage.setItem("groq_api_key", key);
+  popup.innerText = "AI key saved locally";
+  popup.style.display = "block";
+  setTimeout(()=>popup.style.display="none",1200);
+  refreshAIUI();
+}
+
+function refreshAIUI(){
+  const hasKey = !!getAIKey();
+
+  document.getElementById("ai-key-wrap").style.display = hasKey ? "none" : "block";
+
+  // ✅ allow typing always
+  document.getElementById("ai-input").disabled = false;
+
+  // ❌ block sending until key exists
+  document.getElementById("ai-send").disabled = !hasKey;
+}
+const input = document.getElementById("ai-input");
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+
+    const text = input.value.trim();
+    if(!text) return;
+
+    socket.emit("ai_prompt", { prompt: text });
+
+    // 🔥 clear
+    input.value = "";
+    input.focus();
+  }
+});
+</script>
+</body>
+</html>

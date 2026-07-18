@@ -1,0 +1,179 @@
+Here's an example of a Python script that creates a file named `emojis.txt` containing 20 text type emojis. You can modify this script to add more emojis as per your requirements.
+
+```python
+# emojis.py
+
+## TEXT EMOJIS ##
+# Basic Emoticons
+# ===============
+# :) - Smiling face
+# :( - Sad face
+# ;:D - Smiling face (with tongue out)
+# D: - Tongue out face
+# B: - Big grin face
+# P: - Wink face
+# 8-) - Big smile face
+# :-/ - Confused face
+# >:) - Smiling face (with eye roll)
+# >:D - Laughing face (with eye roll)
+
+# Cool Text Emoticons
+# ==================
+# >:> - Smiling cat face
+# <3 - Heart (love face)
+# ^_^ - Smiling cat face (with big eyes)
+# @_@ - Shy face
+# >< - Angry face
+# ^^ - Smiling face (with big eyes)
+# ->> - Confident face
+
+# Miscellaneous Emoticons
+# =======================
+# B-) - Blushing face
+# D8-) - Crazy face
+# >:I - I love it face
+# ><_> - Angry face (with tears)
+# ~_-) - Sad face (with a frown)
+# ~_-^ - Crying face
+# :P - Troll face
+# XD - Laughing face
+# ^_^~ - Happy face (with sparkles)
+# >:) - Smiling face (with eye roll)
+# ;-) - Smiling face (with a smirk)
+# :-[ - Confused face
+# >:( - Angry face (with crying eyes)
+# :-| - Neutral face (with a frown)
+# :^| - Happy face (with a frown)
+
+# Add more emojis here
+# ...
+
+## UNICODE EMOJIS ##
+# ==================
+# You can use the following Unicode emojis in your Python code
+# and HTML files.
+# 
+# Example:
+# print("😊")  # Smiling face
+# print("😡")  # Angry face
+
+# List of Unicode emojis
+# 
+# :smiling_face: 😊
+# :sad_face: ☹️
+# :heart: ❤️
+# :smiling_cat: 😸
+# :shy_face: 😐
+# :angry_face: 😠
+# :smiling_face_with_big_eyes: 😆
+# :confident_face: 😎
+# :blushing_face: 😊
+# :crazy_face: 😳
+# :i_love_it_face: 😍
+# :angry_face_with_tears: 😭
+# :sad_face_with_a_frown: 😔
+# :crying_face: 😭
+# :troll_face: 😜
+# :laughing_face: 😂
+# :happy_face_with_sparkles: 🤩
+# :smiling_face_with_eye_roll: 😜
+# :smiling_face_with_a_smirk: 😉
+# :confused_face: 🙄
+# :angry_face_with_crying_eyes: 😤
+# :neutral_face_with_a_frown: 😐
+# :happy_face_with_a_frown: 😊
+
+## SAVE DATA TO FILE ##
+# =====================
+# Write the emojis to a file named 'emojis.txt'
+with open('emojis.txt', 'w') as f:
+    # Basic Emoticons
+    f.write("Text Emoticons:\n")
+    f.write(":) - Smiling face\n")
+    f.write(":( - Sad face\n")
+    f.write(";:D - Smiling face (with tongue out)\n")
+    f.write("D: - Tongue out face\n")
+    f.write("B: - Big grin face\n")
+    f.write("P: - Wink face\n")
+    f.write("8-) - Big smile face\n")
+    f.write(":-/ - Confused face\n")
+    f.write(">:) - Smiling face (with eye roll)\n")
+    f.write(">:D - Laughing face (with eye roll)\n\n")
+
+    # Cool Text Emoticons
+    f.write("Cool Text Emoticons:\n")
+    f.write(">:> - Smiling cat face\n")
+    f.write("<3 - Heart (love face)\n")
+    f.write("^_^ - Smiling cat face (with big eyes)\n")
+    f.write("@_@ - Shy face\n")
+    f.write(">< - Angry face\n")
+    f.write("^^ - Smiling face (with big eyes)\n")
+    f.write("->> - Confident face\n\n")
+
+    # Miscellaneous Emoticons
+    f.write("Miscellaneous Emoticons:\n")
+    f.write("B-) - Blushing face\n")
+    f.write("D8-) - Crazy face\n")
+    f.write(">:I - I love it face\n")
+    f.write("><_> - Angry face (with tears)\n")
+    f.write("~_-) - Sad face (with a frown)\n")
+    f.write("~_-^ - Crying face\n")
+    f.write(":P - Troll face\n")
+    f.write("XD - Laughing face\n")
+    f.write("^_^~ - Happy face (with sparkles)\n")
+    f.write(":> - Smiling face (with eye roll)\n")
+    f.write(";-) - Smiling face (with a smirk)\n")
+    f.write(":-[ - Confused face\n")
+    f.write(">:( - Angry face (with crying eyes)\n")
+    f.write(":-| - Neutral face (with a frown)\n")
+    f.write(":^| - Happy face (with a frown)\n")
+
+print("Emojis saved to emojis.txt file.")
+```
+
+After running this script, you'll find a file named `emojis.txt` in the same directory containing 20 text type emojis. You can add more emojis to the script as per your requirements.
+
+Here's a sneak peek at the `emojis.txt` file:
+
+```text
+Text Emoticons:
+
+:) - Smiling face
+:( - Sad face
+;:D - Smiling face (with tongue out)
+D: - Tongue out face
+B: - Big grin face
+P: - Wink face
+8-) - Big smile face
+:-/ - Confused face
+>:) - Smiling face (with eye roll)
+>:D - Laughing face (with eye roll)
+
+Cool Text Emoticons:
+
+>:> - Smiling cat face
+<3 - Heart (love face)
+^_^ - Smiling cat face (with big eyes)
+@_@ - Shy face
+>< - Angry face
+^^ - Smiling face (with big eyes)
+->> - Confident face
+
+Miscellaneous Emoticons:
+
+B-) - Blushing face
+D8-) - Crazy face
+>:I - I love it face
+><_> - Angry face (with tears)
+~_-) - Sad face (with a frown)
+~_-^ - Crying face
+:P - Troll face
+XD - Laughing face
+^_^~ - Happy face (with sparkles)
+:> - Smiling face (with eye roll)
+;-) - Smiling face (with a smirk)
+:-[ - Confused face
+>: - Angry face (with crying eyes)
+:-| - Neutral face (with a frown)
+:^| - Happy face (with a frown)
+```

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>DOXO — Real-time Collaborative Editor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Primary Meta Tags -->
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/YOCRRZ224/Doxo/refs/heads/main/static/fav.png">
+<meta name="title" content="DOXO — Real-time Collaborative Editor">
+<meta name="description" content="DOXO is a real-time collaborative text editor with live cursors, chat, autosave, and rooms. Create and edit documents together instantly.">
+
+<!-- Open Graph / Facebook / WhatsApp -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://your-railway-url.up.railway.app/">
+<meta property="og:title" content="DOXO — Real-time Collaborative Editor">
+<meta property="og:description" content="Edit documents together in real time. Live cursors, chat, autosave, and secure rooms. Built for speed and collaboration.">
+<meta property="og:image" content="https://raw.githubusercontent.com/YOCRRZ224/Doxo/refs/heads/main/static/banner.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://your-railway-url.up.railway.app/">
+<meta property="twitter:title" content="DOXO — Real-time Collaborative Editor">
+<meta property="twitter:description" content="A real-time collaborative editor with live cursors and chat. Create rooms and edit instantly.">
+<meta property="twitter:image" content="https://raw.githubusercontent.com/YOCRRZ224/Doxo/refs/heads/main/static/banner.png">
+<style>
+body {
+  background:#f4f4f4;
+  font-family: monospace;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+button, input {
+  transition: all 0.1s ease;
+}
+form {
+  border:4px solid black;
+  padding:20px;
+  background:white;
+  width:320px;
+  display:flex;
+  flex-direction:column;
+}
+input {
+  background: white;
+  color: black;
+  padding: 6px 12px;
+  border: 2px solid black;
+  margin: 5px 0 8px 0;      /* adjust margins */
+  box-shadow: 2px 2px 0 black;
+  outline: none;
+  font-size: 14px;
+  border-radius: 0;
+  width: calc(100% - 12px); /* full width minus padding */
+  box-sizing: border-box;
+}
+button {
+  background: white;
+  color: black;
+  padding: 6px 12px;
+  border: 2px solid black;
+  margin: 5px 0 8px 0;      /* adjust margins */
+  box-shadow: 2px 2px 0 black;
+  outline: none;
+  font-size: 14px;
+  border-radius: 0;
+  width: calc(100% - 12px); /* full width minus padding */
+  box-sizing: border-box;
+}
+button:active {
+  transform: translate(2px, 2px); /* moves button down-right */
+  box-shadow: 0 0 0 black;       /* removes shadow to look pressed */
+  background: black;
+  color: white;
+}
+input:active {
+  transform: translate(2px, 2px); /* moves button down-right */
+  box-shadow: 0 0 0 black;       /* removes shadow to look pressed */
+}
+/* CSS */
+.logo-container {
+  text-align: center;       /* center the image horizontally */
+  margin-bottom: 15px;      /* space below the logo */
+}
+
+.logo {
+  width: 80px;              /* set width */
+  height: 80px;             /* set height */
+  object-fit: contain;      /* keep aspect ratio */
+  border: 2px solid black;  /* optional border like your button theme */
+  box-shadow: 2px 2px 0 black; /* 3D pop effect */
+  border-radius: 8px;       /* subtle rounding */
+  transition: transform 0.2s ease; /* smooth hover effect */
+}
+
+.logo:hover {
+  transform: scale(1.05);   /* slight zoom on hover */
+}
+</style>
+</head>
+<body>
+<!-- HTML -->
+
+<form method="POST" id="roomForm">
+    <div class="logo-container">
+  <img src="https://raw.githubusercontent.com/YOCRRZ224/Doxo/refs/heads/main/static/fav.png" alt="DOXO Logo" class="logo">
+</div>
+  <h2>DOXO</h2>
+
+  <input name="docname" placeholder="Document name" required>
+  <input name="username" id="usernameInput" placeholder="Your name" required>
+  <input name="emoji" id="emojiInput" placeholder="😀 (optional)">
+  <input type="color" name="color" id="colorInput" required>
+
+  <input name="room" id="roomInput" placeholder="Room Code (empty = create)">
+  <input name="password" placeholder="Password" required>
+
+  <input type="file" id="fileInput" accept=".txt">
+  <input type="hidden" name="fileText" id="fileText">
+  <button type="button" onclick="createRoom()">Create / Join</button>
+</form>
+
+<script>
+// Pre-fill room from URL if present
+const urlParams = new URLSearchParams(window.location.search);
+const roomCode = urlParams.get("room");
+if(roomCode){
+    document.getElementById("roomInput").value = roomCode;
+}
+
+// Random emoji/color defaults
+const emojiInput = document.getElementById("emojiInput");
+const colorInput = document.getElementById("colorInput");
+
+if(!emojiInput.value){
+    const emojis = ['😀','😎','🦄','🐱','🚀'];
+    emojiInput.value = emojis[Math.floor(Math.random()*emojis.length)];
+}
+if(!colorInput.value){
+    colorInput.value = '#'+Math.floor(Math.random()*16777215).toString(16);
+}
+
+// Handle file upload
+function createRoom(){
+  const file = document.getElementById("fileInput").files[0];
+
+  if(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      document.getElementById("fileText").value = reader.result;
+      document.getElementById("roomForm").submit();
+    };
+    reader.readAsText(file);
+  } else {
+    document.getElementById("roomForm").submit();
+  }
+}
+</script>
+
+</body>
+</html>
