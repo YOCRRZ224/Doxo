@@ -1,1 +1,185 @@
-hi
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Gateway Connecting...</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="./manifest.json">
+<style>
+
+*{box-sizing:border-box;}
+
+body{
+margin:0;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+font-family:'Source Code Pro', monospace;
+background:linear-gradient(-45deg,#0f2027,#203a43,#2c5364,#000000);
+background-size:400% 400%;
+animation:bg 10s ease infinite;
+color:white;
+}
+
+@keyframes bg{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+.card{
+width:100%;
+max-width:420px;
+backdrop-filter:blur(12px);
+background:rgba(255,255,255,0.05);
+padding:30px;
+border-radius:16px;
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 0 30px rgba(0,0,0,0.6);
+}
+
+h2{
+margin-top:0;
+margin-bottom:10px;
+font-family:'Audiowide', cursive;
+color:#00ff88;
+font-size:26px;
+}
+
+.status{
+color:#00ff88;
+font-weight:600;
+font-size:14px;
+}
+
+.loader{
+margin:20px auto;
+width:40px;
+height:40px;
+border:4px solid rgba(255,255,255,0.2);
+border-top:4px solid #00ff88;
+border-radius:50%;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+0%{transform:rotate(0deg);}
+100%{transform:rotate(360deg);}
+}
+
+.info{
+margin-top:20px;
+text-align:left;
+font-size:13px;
+line-height:1.6;
+background:rgba(0,0,0,0.35);
+padding:15px;
+border-radius:10px;
+word-break:break-word;
+}
+
+.log{
+margin-top:15px;
+font-size:12px;
+color:#9affc9;
+height:80px;
+overflow:hidden;
+word-break:break-word;
+}
+
+.countdown{
+margin-top:15px;
+font-size:14px;
+color:#00ff88;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>🚀 YOCRRZ Gateway</h2>
+<p class="status">Tunnel Status: ACTIVE</p>
+
+<div class="loader"></div>
+
+<div class="info">
+Session ID: <span id="session"></span><br>
+IP Address: <span id="ip">detecting...</span><br>
+Browser: <span id="browser"></span><br>
+Platform: <span id="platform"></span><br>
+Language: <span id="lang"></span>
+</div>
+
+<div class="log" id="log"></div>
+
+<div class="countdown">
+Redirecting in <span id="timer">5</span> seconds...
+</div>
+
+</div>
+
+<script>
+
+const session = Math.random().toString(36).substring(2,10).toUpperCase();
+document.getElementById("session").textContent = session;
+
+document.getElementById("browser").textContent = navigator.userAgent;
+document.getElementById("platform").textContent = navigator.platform;
+document.getElementById("lang").textContent = navigator.language;
+
+fetch("https://api.ipify.org?format=json")
+.then(res => res.json())
+.then(data => {
+document.getElementById("ip").textContent = data.ip;
+});
+
+const logs = [
+"Initializing gateway...",
+"Generating secure session...",
+"Detecting network node...",
+"Connecting to Cloudflare tunnel...",
+"Handshake complete",
+"Preparing redirect..."
+];
+
+let logIndex = 0;
+
+function showLog(){
+if(logIndex < logs.length){
+document.getElementById("log").innerHTML += "> " + logs[logIndex] + "<br>";
+logIndex++;
+setTimeout(showLog,500);
+}
+}
+
+showLog();
+
+let time = 5;
+
+const timer = setInterval(() => {
+time--;
+document.getElementById("timer").textContent = time;
+
+if(time === 0){
+clearInterval(timer);
+window.location.href = "https://expo-minister-cruise-know.trycloudflare.com";
+}
+
+},1000);
+
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+}
+</script>
+</body>
+</html>
